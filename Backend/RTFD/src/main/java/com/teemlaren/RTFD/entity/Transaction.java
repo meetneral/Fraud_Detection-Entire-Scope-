@@ -17,6 +17,26 @@ public class Transaction {
     private String deviceId;
     private String cardHash;
     private Instant createdAt = Instant.now();
+    // NEW:
+    @Column(length = 1000)
+    private String decisionReason;   // e.g. "AMOUNT_LIMIT,COUNTRY_BLOCKED"
+    private Double score;            // ML score 0..1 (optional)
+
+    public String getDecisionReason() {
+        return decisionReason;
+    }
+
+    public void setDecisionReason(String decisionReason) {
+        this.decisionReason = decisionReason;
+    }
+
+    public Double getScore() {
+        return score;
+    }
+
+    public void setScore(Double score) {
+        this.score = score;
+    }
 
     @Enumerated(EnumType.STRING)
     private Status status = Status.PENDING;

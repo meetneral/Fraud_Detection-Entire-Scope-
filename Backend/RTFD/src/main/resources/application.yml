@@ -1,3 +1,18 @@
+fraud:
+  rules:
+    amount-max-decline: 100000     # > DECLINE
+    amount-max-challenge: 50000    # > CHALLENGE
+    blocked-countries: ["NG","RU"] # ISO2 (sample)
+    blocked-devices: []
+    blocked-cards: []
+
+ml:
+  scorer:
+    url: http://localhost:9000/score
+    challenge-threshold: 0.60
+    decline-threshold: 0.85
+
+
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/frauddb
