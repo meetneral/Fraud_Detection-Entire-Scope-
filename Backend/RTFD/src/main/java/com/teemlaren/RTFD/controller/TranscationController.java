@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/transactions")
@@ -27,12 +28,18 @@ public class TranscationController {
     @GetMapping
     public List<Transaction> all() {
         return repo.findAll();
+    }
+    @GetMapping("/{id}")
 
+    public Optional<?> getByID(@PathVariable String id){
+        return repo.findBymerchantId(id);
     }
 
     @PostMapping
     public Transaction Create(@RequestBody Transaction tx) {
-        Transaction evaluatedTx = fraudDetectionService.evaluate(tx);
-        return repo.save(tx);
+//        Transaction evaluatedTx = fraudDetectionService.evaluate(tx);
+//        return repo.save(tx);
+        Transaction evalTX = fraudDetectionService.evaluate(tx);
+        return repo.save(evalTX);
     }
 }
