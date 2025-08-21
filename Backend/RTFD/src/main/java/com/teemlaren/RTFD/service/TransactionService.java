@@ -24,7 +24,6 @@ public class TransactionService {
     public Transaction createAndDecide(Transaction tx) {
         // initial save (optional) if you want an ID first; or evaluate first then save
         FraudDecision decision = ruleEngine.evaluate(tx);
-
         tx.setStatus(decision.getStatus());
         tx.setDecisionReason(String.join(",",
                 decision.getReasons().stream().map(Enum::name).toList()
