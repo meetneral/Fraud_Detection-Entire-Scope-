@@ -1,35 +1,94 @@
 package com.teemlaren.RTFD.entity;
 
-
-import com.teemlaren.RTFD.entity.Transaction;
 import com.teemlaren.RTFD.enums.DecisionReason;
+import jakarta.persistence.*;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+@Entity
+@Table(name = "fraud_decisions")
 public class FraudDecision {
-    private Transaction.Status status;
-    private final List<DecisionReason> reasons = new ArrayList<>();
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private Long transactionId;
+
+    private String ruleTriggered; // e.g., AMOUNT_LIMIT, COUNTRY_BLACKLIST, NEW_DEVICE
+
+    @Enumerated(EnumType.STRING)
+    private Decision decision; // APPROVED, DECLINED, CHALLENGE
+
+    private Instant timestamp = Instant.now();
+
     private Double score; // optional ML score
 
-    public FraudDecision(Transaction.Status status) {
-        this.status = status;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Enumerated(EnumType.STRING)
+    @CollectionTable(name = "fraud_decision_reasons", joinColumns = @JoinColumn(name = "fraud_decision_id"))
+    @Column(name = "reason")
+    private List<DecisionReason> reasons = new ArrayList<>();
+
+    // ===== ENUM =====
+    public enum Decision {
+        APPROVED, DECLINED, CHALLENGE
     }
 
-    public Transaction.Status getStatus() {
-        return status;
+    // ===== CONSTRUCTORS =====
+    public FraudDecision() {
+        // Required by JPA
     }
 
-    public void setStatus(Transaction.Status status) {
-        this.status = status;
+    public FraudDecision(Long transactionId, String ruleTriggered, Decision decision, Double score) {
+        this.transactionId = transactionId;
+        this.ruleTriggered = ruleTriggered;
+        this.decision = decision;
+        this.score = score;
+        this.timestamp = Instant.now();
     }
 
-    public List<DecisionReason> getReasons() {
-        return reasons;
+    // ===== GETTERS + SETTERS =====
+    public Long getId() {
+        return id;
     }
 
-    public void addReason(DecisionReason r) {
-        reasons.add(r);
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getTransactionId() {
+        return transactionId;
+    }
+
+    public void setTransactionId(Long transactionId) {
+        this.transactionId = transactionId;
+    }
+
+    public String getRuleTriggered() {
+        return ruleTriggered;
+    }
+
+    public void setRuleTriggered(String ruleTriggered) {
+        this.ruleTriggered = ruleTriggered;
+    }
+
+    public Decision getDecision() {
+        return decision;
+    }
+
+    public void setDecision(Decision decision) {
+        this.decision = decision;
+    }
+
+    public Instant getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(Instant timestamp) {
+        this.timestamp = timestamp;
     }
 
     public Double getScore() {
@@ -39,5 +98,16 @@ public class FraudDecision {
     public void setScore(Double score) {
         this.score = score;
     }
-}
 
+    public List<DecisionReason> getReasons() {
+        return reasons;
+    }
+
+    public void setReasons(List<DecisionReason> reasons) {
+        this.reasons = reasons;
+    }
+
+    public void addReason(DecisionReason reason) {
+        this.reasons.add(reason);
+    }
+}

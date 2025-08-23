@@ -61,8 +61,11 @@ public class FraudRuleEngine {
 
 
     public FraudDecision evaluate(Transaction tx) {
-        FraudDecision decision = new FraudDecision(Transaction.Status.APPROVED);
-        // ... (existing rules as shown before)
+        FraudDecision decision = new FraudDecision(  tx.getId(),
+                "ML_RULE_ENGINE",   // ruleTriggered
+                FraudDecision.Decision.APPROVED,
+                null      );
+
 
         // Build features for ML
         var features = java.util.Map.<String,Object>of(
@@ -77,11 +80,11 @@ public class FraudRuleEngine {
         if (score != null) {
             decision.setScore(score);
             if (score >= mlClient.getDeclineThreshold()) {
-                decision.setStatus(Transaction.Status.DECLINED);
+                decision.setDecision(FraudDecision.Decision.DECLINED);
                 decision.addReason(DecisionReason.ML_SCORE_HIGH);
             } else if (score >= mlClient.getChallengeThreshold()
-                    && decision.getStatus() != Transaction.Status.DECLINED) {
-                decision.setStatus(Transaction.Status.CHALLENGE);
+                    && decision.getDecision() != FraudDecision.Decision.DECLINED) {
+                decision.setDecision(FraudDecision.Decision.CHALLENGE);
                 decision.addReason(DecisionReason.ML_SCORE_MEDIUM);
             }
         }
