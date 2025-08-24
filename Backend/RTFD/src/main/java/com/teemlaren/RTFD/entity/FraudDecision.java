@@ -15,7 +15,10 @@ public class FraudDecision {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long transactionId;
+    @OneToOne(optional = false)
+    @JoinColumn(name = "transaction_id", nullable = false)
+    private Transaction transaction;
+
 
     private String ruleTriggered; // e.g., AMOUNT_LIMIT, COUNTRY_BLACKLIST, NEW_DEVICE
 
@@ -42,8 +45,8 @@ public class FraudDecision {
         // Required by JPA
     }
 
-    public FraudDecision(Long transactionId, String ruleTriggered, Decision decision, Double score) {
-        this.transactionId = transactionId;
+    public FraudDecision(Transaction transaction, String ruleTriggered, Decision decision, Double score) {
+        this.transaction = transaction;
         this.ruleTriggered = ruleTriggered;
         this.decision = decision;
         this.score = score;
@@ -59,14 +62,13 @@ public class FraudDecision {
         this.id = id;
     }
 
-    public Long getTransactionId() {
-        return transactionId;
+    public Transaction getTransaction() {
+        return transaction;
     }
 
-    public void setTransactionId(Long transactionId) {
-        this.transactionId = transactionId;
+    public void setTransaction(Transaction transaction) {
+        this.transaction = transaction;
     }
-
     public String getRuleTriggered() {
         return ruleTriggered;
     }

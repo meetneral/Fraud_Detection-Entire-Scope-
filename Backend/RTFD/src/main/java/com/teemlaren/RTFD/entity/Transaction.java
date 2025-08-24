@@ -21,6 +21,16 @@ public class Transaction {
     @Column(length = 1000)
     private String decisionReason;   // e.g. "AMOUNT_LIMIT,COUNTRY_BLOCKED"
     private Double score;            // ML score 0..1 (optional)
+    @OneToOne(mappedBy = "transaction", cascade = CascadeType.ALL, orphanRemoval = true)
+    private FraudDecision fraudDecision;
+
+    public FraudDecision getFraudDecision() {
+        return fraudDecision;
+    }
+
+    public void setFraudDecision(FraudDecision fraudDecision) {
+        this.fraudDecision = fraudDecision;
+    }
 
     public String getDecisionReason() {
         return decisionReason;

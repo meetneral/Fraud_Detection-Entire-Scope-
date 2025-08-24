@@ -61,7 +61,7 @@ public class FraudRuleEngine {
 
 
     public FraudDecision evaluate(Transaction tx) {
-        FraudDecision decision = new FraudDecision(  tx.getId(),
+        FraudDecision decision = new FraudDecision(  tx,
                 "ML_RULE_ENGINE",   // ruleTriggered
                 FraudDecision.Decision.APPROVED,
                 null      );

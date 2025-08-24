@@ -4,6 +4,7 @@ import com.teemlaren.RTFD.entity.Transaction;
 import com.teemlaren.RTFD.entity.FraudDecision;
 import com.teemlaren.RTFD.enums.DecisionReason;
 import com.teemlaren.RTFD.repository.FraudDecisionRepository;
+import com.teemlaren.RTFD.repository.TransactionRepository;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -16,10 +17,12 @@ import java.util.Map;
 public class FraudDetectionService {
     private final RestTemplate restTemplate = new RestTemplate();
     private final FraudDecisionRepository fraudDecisionRepository;
+    private final TransactionRepository transactionRepository;
 
-
-    public FraudDetectionService(FraudDecisionRepository fraudDecisionRepository) {
+    public FraudDetectionService(FraudDecisionRepository fraudDecisionRepository,
+                                 TransactionRepository transactionRepository) {
         this.fraudDecisionRepository = fraudDecisionRepository;
+        this.transactionRepository = transactionRepository;
     }
 
     public Transaction evaluate(Transaction tx) {
@@ -47,7 +50,7 @@ public class FraudDetectionService {
                 }
 
                 // ✅ Log decision
-                logDecision(tx.getId(),
+                logDecision(tx,
                         "PYTHON_SCORER",
                         FraudDecision.Decision.valueOf(tx.getStatus().name()));
             }
@@ -59,7 +62,7 @@ public class FraudDetectionService {
                 tx.setDecisionReason("Amount exceeds ₹1,00,000 " + DecisionReason.AMOUNT_LIMIT);
                 tx.setScore(0.9);
 
-                logDecision(tx.getId(),
+                logDecision(tx,
                         "AMOUNT_LIMIT",
                         FraudDecision.Decision.DECLINED);
                 return tx;
@@ -71,7 +74,7 @@ public class FraudDetectionService {
                 tx.setDecisionReason("Suspicious country detected " + DecisionReason.COUNTRY_BLOCKED);
                 tx.setScore(0.7);
 
-                logDecision(tx.getId(),
+                logDecision(tx,
                         "COUNTRY_BLOCKED",
                         FraudDecision.Decision.CHALLENGE);
                 return tx;
@@ -83,7 +86,7 @@ public class FraudDetectionService {
                 tx.setDecisionReason("Blacklisted device " + DecisionReason.DEVICE_BLOCKED);
                 tx.setScore(0.95);
 
-                logDecision(tx.getId(),
+                logDecision(tx,
                         "DEVICE_BLOCKED",
                         FraudDecision.Decision.DECLINED);
                 return tx;
@@ -94,7 +97,7 @@ public class FraudDetectionService {
             tx.setDecisionReason("Transaction looks normal");
             tx.setScore(0.1);
 
-            logDecision(tx.getId(),
+            logDecision(tx,
                     "NO_RULE",
                     FraudDecision.Decision.APPROVED);
             return tx;
@@ -102,11 +105,18 @@ public class FraudDetectionService {
         return tx;
     }
 
-    private void logDecision(Long transactionId, String rule, FraudDecision.Decision decision) {
+    private void logDecision(Transaction tx, String rule, FraudDecision.Decision decision) {
+
+
+        if (tx.getId() == null) {
+            tx = transactionRepository.save(tx);
+        }
         FraudDecision fd = new FraudDecision();
-        fd.setTransactionId(transactionId);
+
+        fd.setTransaction(tx);
         fd.setRuleTriggered(rule);
         fd.setDecision(decision);
+        fd.setScore(tx.getScore());
         fraudDecisionRepository.save(fd);
     }
 }

@@ -36,10 +36,11 @@ public class TranscationController {
     }
 
     @PostMapping
-    public Transaction Create(@RequestBody Transaction tx) {
+    public void Create(@RequestBody Transaction tx) {
 //        Transaction evaluatedTx = fraudDetectionService.evaluate(tx);
 //        return repo.save(tx);
         Transaction evalTX = fraudDetectionService.evaluate(tx);
-        return repo.save(evalTX);
+        //return repo.save(evalTX);
+
     }
 }

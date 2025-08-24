@@ -10,7 +10,7 @@ import com.teemlaren.RTFD.repository.TransactionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.teemlaren.RTFD.entity.FraudDecision.Decision.APPROVED;
+
 
 @Service
 public class TransactionService {
@@ -27,7 +27,7 @@ public class TransactionService {
 
     @Transactional
     public Transaction createAndDecide(Transaction tx) {
-        Transaction savedTx =repo.save(tx);
+        Transaction savedTx =repo.saveAndFlush(tx);
         // initial save (optional) if you want an ID first; or evaluate first then save
         FraudDecision decision = ruleEngine.evaluate(savedTx);
 
@@ -43,10 +43,10 @@ public class TransactionService {
         savedTx.setScore(decision.getScore());
 
         // 4. Link decision with transactionId and save
-        decision.setTransactionId(savedTx.getId());
-        fraudDecisionRepo.save(decision);
+        decision.setTransaction(savedTx);
+        savedTx.setFraudDecision(decision);
 
-        return repo.save(tx);
+        return repo.saveAndFlush(savedTx);
     }
 }
 
